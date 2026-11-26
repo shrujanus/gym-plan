@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Upper/Lower 4x size and strength tracker — warm-ups, calculated working weights, and session logging."
+    />
+    <link rel="icon" href="favicon.svg" type="image/svg+xml" />
+    <title>Upper / Lower 4x Tracker</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=IBM+Plex+Sans:wght@400;500;600&family=Syne:wght@700;800&display=swap"
+      rel="stylesheet"
+    />
+    <link rel="stylesheet" href="css/styles.css" />
+  </head>
+  <body>
+    <div class="app">
+      <header class="topbar">
+        <div class="brand">
+          <div class="brand-mark">UPPER<span>/</span>LOWER</div>
+          <div class="brand-sub">4× Size &amp; Strength · 9-week tracker</div>
+        </div>
+        <button class="icon-btn" id="open-settings" aria-label="Settings" title="Settings">
+          ⚙
+        </button>
+      </header>
+
+      <main id="view"></main>
+    </div>
+
+    <div class="rest-bar" id="rest-bar">
+      <div>
+        <div class="eyebrow" style="color: rgba(247, 243, 235, 0.65)">Rest timer</div>
+        <div class="rest-time" id="rest-time">02:00</div>
+      </div>
+      <button class="btn btn-ghost" id="stop-rest" style="color: #141816">Skip</button>
+    </div>
+
+    <nav class="nav" id="main-nav">
+      <button data-view="home">Plan</button>
+      <button data-view="warmup">Warm-up</button>
+      <button data-view="workout">Lift</button>
+      <button data-view="log">Log</button>
+    </nav>
+
+    <div class="toast" id="toast" role="status"></div>
+
+    <script src="js/program-data.js"></script>
+    <script src="js/weights.js"></script>
+    <script src="js/storage.js"></script>
+    <script src="js/app.js"></script>
+  </body>
+</html>
