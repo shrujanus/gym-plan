@@ -32,6 +32,43 @@
     return weekData(week).days[day - 1];
   }
 
+  function dayKind(day = dayData()) {
+    const id = (day && day.id) || "";
+    if (id.startsWith("upper") || /upper/i.test(day.label || "")) return "upper";
+    return "lower";
+  }
+
+  function warmupProtocol(day = dayData()) {
+    const kind = dayKind(day);
+    return window.PROGRAM.warmup[kind] || [];
+  }
+
+  async function syncPush(quiet) {
+    if (!state.githubToken) return false;
+    try {
+      await GithubDb.push(state);
+      persist();
+      if (!quiet) toast("Synced to repo");
+      return true;
+    } catch (err) {
+      toast(err.message || "Sync failed");
+      return false;
+    }
+  }
+
+  async function syncPull(quiet) {
+    if (!state.githubToken) return false;
+    try {
+      const result = await GithubDb.pull(state);
+      persist();
+      if (!quiet) toast(result.pulled ? "Pulled from repo" : "No remote DB yet — push to create");
+      return true;
+    } catch (err) {
+      toast(err.message || "Pull failed");
+      return false;
+    }
+  }
+
   function logsFor(week, day) {
     return state.logs.filter((l) => l.week === week && l.day === day);
   }
@@ -215,14 +252,18 @@
         <div class="day-grid">${chips}</div>
         <div class="btn-row">
           <button class="btn btn-accent" id="start-workout">Open ${day.label}</button>
-          <button class="btn btn-ghost" data-goto="warmup">Warm-up protocol</button>
+          <button class="btn btn-ghost" data-goto="warmup">${
+            dayKind(day) === "upper" ? "Upper" : "Lower"
+          } warm-up</button>
         </div>
       </section>`;
   }
 
   function renderWarmup() {
+    const day = dayData();
+    const kind = dayKind(day);
     const draft = getDraft();
-    const items = window.PROGRAM.warmup.protocol
+    const items = warmupProtocol(day)
       .map((item, i) => {
         const done = !!draft.warmupDone[i];
         return `
@@ -237,11 +278,13 @@
       })
       .join("");
 
+    const title = kind === "upper" ? "Upper-body warm-up" : "Lower-body warm-up";
+
     return `
       <section class="panel">
-        <p class="eyebrow">Before heavy lifting</p>
-        <h2>General warm-up</h2>
-        <p class="muted">Keep this under 10–20 minutes. Primary lifts also get a loading pyramid in the workout view.</p>
+        <p class="eyebrow">${day.label} · Week ${state.currentWeek}</p>
+        <h2>${title}</h2>
+        <p class="muted">Matched to today's session. Keep it under 10–20 minutes. Primary lifts also get a loading pyramid in the workout view.</p>
         <div class="warmup-list" style="margin-top:1rem">${items}</div>
         <div class="btn-row">
           <button class="btn btn-accent" data-goto="workout">Continue to workout</button>
@@ -376,27 +419,39 @@
   }
 
   function renderLog() {
+    const syncNote = state.lastSyncedAt
+      ? `<p class="muted">Last repo sync: ${new Date(state.lastSyncedAt).toLocaleString()}</p>`
+      : `<p class="muted">Local only — connect GitHub in Settings to store logs in <code>data/workouts.json</code>.</p>`;
+
     if (!state.logs.length) {
-      return `<section class="panel"><h2>Training log</h2><div class="empty">No sessions logged yet. Finish a workout to build history.</div></section>`;
+      return `<section class="panel"><h2>Training log</h2>${syncNote}<div class="empty">No sessions logged yet. Finish a workout to build history.</div></section>`;
     }
     const items = [...state.logs]
       .reverse()
       .map((log) => {
-        const lifts = (log.exercises || [])
-          .slice(0, 4)
-          .map((e) => e.name)
-          .join(" · ");
+        const detail = (log.exercises || [])
+          .map((e) => {
+            const sets = (e.sets || [])
+              .filter((s) => s.weight || s.reps)
+              .map((s) => `${s.weight || "—"}×${s.reps || "—"}${s.rpe ? `@${s.rpe}` : ""}`)
+              .join(", ");
+            const weak = e.weakPoint ? ` → ${e.weakPoint}` : "";
+            return `<div class="log-ex"><strong>${e.name}${weak}</strong><div class="muted">${
+              sets || "no sets logged"
+            }</div></div>`;
+          })
+          .join("");
         return `
         <div class="log-item">
           <h3>Week ${log.week} · Day ${log.day} · ${log.dayLabel || ""}</h3>
           <p class="muted" style="margin:0.25rem 0">${log.date}${
             log.completed ? " · completed" : ""
-          }</p>
-          <p class="muted" style="margin:0">${lifts}${(log.exercises || []).length > 4 ? "…" : ""}</p>
+          } · ${log.unit || unit()}</p>
+          <div class="log-detail">${detail}</div>
         </div>`;
       })
       .join("");
-    return `<section class="panel"><h2>Training log</h2><div class="log-list" style="margin-top:1rem">${items}</div></section>`;
+    return `<section class="panel"><h2>Training log</h2>${syncNote}<div class="log-list" style="margin-top:1rem">${items}</div></section>`;
   }
 
   function renderSettings() {
@@ -411,6 +466,8 @@
       </div>`
       )
       .join("");
+
+    const { owner, repo } = GithubDb.repoFromLocation();
 
     return `
       <section class="panel">
@@ -429,6 +486,39 @@
           <button class="btn btn-accent" id="save-settings">Save settings</button>
           <button class="btn btn-warn" id="reset-data">Reset all data</button>
         </div>
+      </section>
+
+      <section class="panel" style="margin-top:1rem">
+        <p class="eyebrow">Personal DB</p>
+        <h2>GitHub repo sync</h2>
+        <p class="muted">Stores 1RMs + session logs in <code>${
+          state.githubPath || "data/workouts.json"
+        }</code> on <strong>${owner}/${repo}</strong>. Your token stays in this browser only — never committed.</p>
+        <p class="muted" style="margin-top:0.5rem"><strong>Privacy:</strong> this repo is public, so workout data in that file is visible to anyone. Fine for personal lifts if you’re okay with that; otherwise keep logs local only.</p>
+        <div class="form-grid" style="margin-top:1rem">
+          <div class="field full">
+            <label for="gh-token">GitHub token (Contents: Read &amp; Write on this repo)</label>
+            <input id="gh-token" type="password" autocomplete="off" placeholder="ghp_… or fine-grained token" value="${
+              state.githubToken ? "••••••••••••" : ""
+            }" />
+          </div>
+          <div class="field full">
+            <label class="check-label"><input type="checkbox" id="auto-sync" ${
+              state.autoSync !== false ? "checked" : ""
+            } /> Auto-sync after finishing a session</label>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-accent" id="save-gh">Save token</button>
+          <button class="btn btn-ghost" id="pull-gh">Pull from repo</button>
+          <button class="btn btn-ghost" id="push-gh">Push to repo</button>
+          <button class="btn btn-warn" id="clear-gh">Clear token</button>
+        </div>
+        <p class="muted" style="margin-top:0.75rem">Create a fine-grained PAT with access to <code>${owner}/${repo}</code> and <strong>Contents: Read and write</strong>. ${
+          state.lastSyncedAt
+            ? `Last sync: ${new Date(state.lastSyncedAt).toLocaleString()}.`
+            : "Not synced yet."
+        }</p>
         <p class="attribution">${window.PROGRAM.attribution}</p>
       </section>`;
   }
@@ -579,7 +669,7 @@
       toast("Draft saved");
     });
 
-    $("#finish-session")?.addEventListener("click", () => {
+    $("#finish-session")?.addEventListener("click", async () => {
       const day = dayData();
       const draft = getDraft();
       const exercises = day.exercises.map((ex, idx) => {
@@ -605,7 +695,13 @@
       };
       Store.upsertLog(state, log);
       persist();
-      toast("Session saved");
+      if (state.githubToken && state.autoSync !== false) {
+        toast("Session saved — syncing…");
+        await syncPush(true);
+        toast("Session saved & synced");
+      } else {
+        toast("Session saved");
+      }
       setView("log");
     });
 
@@ -618,9 +714,50 @@
       toast("Settings saved");
     });
 
+    $("#save-gh")?.addEventListener("click", () => {
+      const input = $("#gh-token");
+      const val = (input?.value || "").trim();
+      if (val && !val.startsWith("•")) state.githubToken = val;
+      state.autoSync = !!$("#auto-sync")?.checked;
+      persist();
+      toast(state.githubToken ? "Token saved in this browser" : "No token entered");
+    });
+
+    $("#pull-gh")?.addEventListener("click", async () => {
+      const input = $("#gh-token");
+      const val = (input?.value || "").trim();
+      if (val && !val.startsWith("•")) {
+        state.githubToken = val;
+        persist();
+      }
+      await syncPull(false);
+      render();
+    });
+
+    $("#push-gh")?.addEventListener("click", async () => {
+      const input = $("#gh-token");
+      const val = (input?.value || "").trim();
+      if (val && !val.startsWith("•")) {
+        state.githubToken = val;
+        persist();
+      }
+      await syncPush(false);
+      render();
+    });
+
+    $("#clear-gh")?.addEventListener("click", () => {
+      state.githubToken = "";
+      state.githubSha = null;
+      persist();
+      toast("Token cleared");
+      render();
+    });
+
     $("#reset-data")?.addEventListener("click", () => {
       if (!confirm("Erase all logs, drafts, and 1RMs?")) return;
+      const token = state.githubToken;
       Object.assign(state, Store.defaults());
+      state.githubToken = token;
       persist();
       setView("setup");
       toast("Data reset");
@@ -636,5 +773,16 @@
   }
 
   bindGlobal();
-  render();
+
+  (async function boot() {
+    if (state.githubToken) {
+      try {
+        await GithubDb.pull(state);
+        persist();
+      } catch {
+        // Offline or bad token — keep local data
+      }
+    }
+    render();
+  })();
 })();

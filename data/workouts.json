@@ -1,0 +1,19 @@
+{
+  "version": 1,
+  "updatedAt": null,
+  "unit": "lb",
+  "oneRms": {
+    "squat": null,
+    "bench": null,
+    "deadlift": null,
+    "ohp": null,
+    "incline": null
+  },
+  "weakPoints": {
+    "upper": { "bodypart": "", "exercise": "" },
+    "lower": { "bodypart": "", "exercise": "" }
+  },
+  "currentWeek": 1,
+  "currentDay": 1,
+  "logs": []
+}
