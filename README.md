@@ -6,10 +6,19 @@ Personal web app for running a 9-week upper/lower (4×/week) size & strength blo
 
 - Enter squat / bench / deadlift / OHP (and optional incline) 1RMs
 - Browse all 9 weeks × 4 days with wave loading baked in
-- General warm-up checklist plus primary-lift loading pyramids
+- **Separate upper / lower warm-up checklists**, plus primary-lift loading pyramids
 - Auto-suggested working weights from `%1RM`
-- Log weight, reps, and RPE per set (saved in `localStorage`)
+- Log weight, reps, and RPE per set
 - Weak-point exercise picker for upper/lower slots
+- Optional **GitHub repo DB**: syncs 1RMs + logs to `data/workouts.json` via a personal token (stored only in your browser)
+
+## Repo sync (personal DB)
+
+1. Create a fine-grained PAT with **Contents: Read and write** on this repo.
+2. Open the app → Settings → paste the token → **Save token**.
+3. **Push to repo** creates/updates `data/workouts.json`. With auto-sync on, finishing a session pushes for you.
+
+**Privacy:** if the repo is public, that JSON (your lifts) is public too. Keep it local-only if you don’t want that.
 
 ## Run locally
 

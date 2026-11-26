@@ -592,6 +592,33 @@ a {
   font-size: 1.05rem;
 }
 
+.log-detail {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+  margin-top: 0.65rem;
+}
+
+.log-ex strong {
+  font-size: 0.92rem;
+}
+
+.check-label {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  color: var(--ink-soft);
+}
+
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85em;
+  background: var(--bg-deep);
+  padding: 0.1em 0.35em;
+  border-radius: 6px;
+}
+
 .empty {
   text-align: center;
   padding: 2rem 1rem;

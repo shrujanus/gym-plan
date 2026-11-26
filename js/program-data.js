@@ -3229,7 +3229,7 @@ window.PROGRAM = {
     }
   },
   "warmup": {
-    "protocol": [
+    "lower": [
       {
         "name": "Low Intensity Cardio",
         "sets": null,
@@ -3237,16 +3237,16 @@ window.PROGRAM = {
         "notes": "Any machine; heart rate ~100\u2013135 bpm"
       },
       {
-        "name": "Foam Rolling / Lacrosse Ball",
+        "name": "Foam Rolling (Lower)",
         "sets": null,
         "reps": "2\u20133 min",
-        "notes": "Quads, lats, calves; optionally pecs, delts, hamstrings"
+        "notes": "Quads, hamstrings, glutes, calves; lacrosse ball for tight spots"
       },
       {
         "name": "Front/Back Leg Swing",
         "sets": 2,
         "reps": "12 each leg",
-        "notes": ""
+        "notes": "Open up hips before squats / deads"
       },
       {
         "name": "Side/Side Leg Swing",
@@ -3255,10 +3255,48 @@ window.PROGRAM = {
         "notes": ""
       },
       {
+        "name": "World's Greatest Stretch",
+        "sets": 2,
+        "reps": "6 each side",
+        "notes": "Lunge + rotate; keep back hip down"
+      },
+      {
         "name": "Standing Glute Squeeze",
         "sets": 2,
         "reps": "15 sec",
         "notes": "Squeeze glutes as hard as possible"
+      },
+      {
+        "name": "Bodyweight Squat / Good Morning",
+        "sets": 2,
+        "reps": "10",
+        "notes": "Groove hip hinge and knee tracking"
+      },
+      {
+        "name": "Cat-Cow",
+        "sets": 1,
+        "reps": "10",
+        "notes": "Mobilize the spine before loading"
+      }
+    ],
+    "upper": [
+      {
+        "name": "Low Intensity Cardio",
+        "sets": null,
+        "reps": "5\u201310 min",
+        "notes": "Any machine; heart rate ~100\u2013135 bpm"
+      },
+      {
+        "name": "Foam Rolling (Upper)",
+        "sets": null,
+        "reps": "2\u20133 min",
+        "notes": "Lats, pecs, delts, mid-back; lacrosse ball for tight spots"
+      },
+      {
+        "name": "Arm Circles / Band Dislocates",
+        "sets": 2,
+        "reps": "12",
+        "notes": "Open the shoulders through full ROM"
       },
       {
         "name": "Prone Trap Raise",
@@ -3267,22 +3305,28 @@ window.PROGRAM = {
         "notes": "Mind-muscle connection with mid back"
       },
       {
-        "name": "Cable External Rotation",
+        "name": "Cable / Band External Rotation",
         "sets": 2,
         "reps": "15 each side",
-        "notes": ""
+        "notes": "Light; warm the rotator cuff"
       },
       {
-        "name": "Cable Internal Rotation",
+        "name": "Cable / Band Internal Rotation",
         "sets": 2,
         "reps": "15 each side",
-        "notes": ""
+        "notes": "Light; keep elbow pinned to your side"
       },
       {
         "name": "Overhead Shrug",
         "sets": 2,
         "reps": "15",
         "notes": "Light squeeze on traps at the top"
+      },
+      {
+        "name": "Scap Push-Up or Band Pull-Apart",
+        "sets": 2,
+        "reps": "12",
+        "notes": "Wake up scapular control before pressing / pulling"
       }
     ],
     "pyramid": [
@@ -3313,7 +3357,7 @@ window.PROGRAM = {
         "reps": 2
       }
     ],
-    "note": "Extensive warm-up pyramids are only required for primary exercises."
+    "note": "Use the lower or upper protocol matching today's session. Extensive loading pyramids are only required for primary exercises."
   },
   "weakPoints": {
     "upper": {

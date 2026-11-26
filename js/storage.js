@@ -1,5 +1,6 @@
 (function () {
   const KEY = "ul4x-tracker-v1";
+  const TOKEN_KEY = "ul4x-github-token";
 
   const defaults = () => ({
     setupComplete: false,
@@ -19,20 +20,45 @@
     },
     logs: [],
     sessionDrafts: {},
+    githubPath: "data/workouts.json",
+    githubSha: null,
+    lastSyncedAt: null,
+    autoSync: true,
   });
+
+  function loadToken() {
+    try {
+      return localStorage.getItem(TOKEN_KEY) || "";
+    } catch {
+      return "";
+    }
+  }
+
+  function saveToken(token) {
+    if (!token) localStorage.removeItem(TOKEN_KEY);
+    else localStorage.setItem(TOKEN_KEY, token);
+  }
 
   function load() {
     try {
       const raw = localStorage.getItem(KEY);
-      if (!raw) return defaults();
-      return Object.assign(defaults(), JSON.parse(raw));
+      const state = raw ? Object.assign(defaults(), JSON.parse(raw)) : defaults();
+      // Token stays in a separate key so it is never written into workouts.json
+      state.githubToken = loadToken();
+      return state;
     } catch {
-      return defaults();
+      const state = defaults();
+      state.githubToken = loadToken();
+      return state;
     }
   }
 
   function save(state) {
-    localStorage.setItem(KEY, JSON.stringify(state));
+    const copy = { ...state };
+    const token = copy.githubToken || "";
+    delete copy.githubToken;
+    localStorage.setItem(KEY, JSON.stringify(copy));
+    saveToken(token);
   }
 
   function draftKey(week, day) {
@@ -48,5 +74,5 @@
     state.logs.sort((a, b) => String(a.date).localeCompare(String(b.date)));
   }
 
-  window.Store = { load, save, draftKey, upsertLog, defaults };
+  window.Store = { load, save, draftKey, upsertLog, defaults, saveToken };
 })();
